@@ -15,11 +15,11 @@ The scheduled task **Send new facts to Hence** runs once every 4 hours by defaul
 1. Place this folder at `local/hence` (the repository root is the plugin root).
 2. Visit Site administration > Notifications and install **Hence**.
 3. Open Site administration > Plugins > Local plugins > Hence settings.
-4. The **Hence address** is already `https://hence.today/evidence.php`. Change it only if this site should send facts somewhere else.
+4. The **Hence address** is already `https://hence.today/api/evidence`. Change it only if this site should send facts somewhere else.
 5. Set **Shared secret** to the same value stored on the Hence server. Hence reads it from the environment variable `HENCE_EVIDENCE_SECRET` or from `data/evidence_secret`. The plugin sends it in the `X-Hence-Evidence-Secret` header. Do not commit the secret.
 6. Open Site administration > Plugins > Local plugins > Hence, or go directly to `/local/hence/index.php`.
 
-Until the shared secret is set, the task records that it is not configured and does not mark any fact as sent. An empty address still posts to `https://hence.today/evidence.php`.
+Until the shared secret is set, the task records that it is not configured and does not mark any fact as sent. An empty address still posts to `https://hence.today/api/evidence`.
 
 ## What is sent
 

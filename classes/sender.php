@@ -34,7 +34,7 @@ namespace local_hence;
 class sender {
 
     /** @var string Where facts go unless a manager sets another address. */
-    public const DEFAULT_ENDPOINT = 'https://hence.today/evidence.php';
+    public const DEFAULT_ENDPOINT = 'https://hence.today/api/evidence';
 
     /** @var int Facts in one request. */
     private const BATCH = 200;

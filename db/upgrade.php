@@ -61,5 +61,13 @@ function xmldb_local_hence_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026112603, 'local', 'hence');
     }
 
+    if ($oldversion < 2026112604) {
+        $endpoint = trim((string) get_config('local_hence', 'endpoint'));
+        if ($endpoint === '' || $endpoint === 'https://hence.today/evidence.php') {
+            set_config('endpoint', \local_hence\sender::DEFAULT_ENDPOINT, 'local_hence');
+        }
+        upgrade_plugin_savepoint(true, 2026112604, 'local', 'hence');
+    }
+
     return true;
 }
