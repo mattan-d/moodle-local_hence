@@ -109,6 +109,9 @@ class collector {
                 'facts' => count($facts),
             ];
         }
+        usort($people, static function (array $a, array $b): int {
+            return [$b['facts'], $a['fullname']] <=> [$a['facts'], $b['fullname']];
+        });
         return $people;
     }
 

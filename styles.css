@@ -1,0 +1,98 @@
+.path-local-hence .hence-banner {
+    margin: 0 0 1.25rem;
+    padding: 0.9rem 1rem;
+    border: 1px solid #d9d3fb;
+    border-inline-start: 4px solid #533afd;
+    background: #f7f5ff;
+}
+
+.path-local-hence .hence-rule {
+    margin: 0.35rem 0 0;
+    color: #061b31;
+}
+
+.path-local-hence .hence-stats {
+    display: grid;
+    grid-template-columns: repeat(5, minmax(0, 1fr));
+    gap: 0.75rem;
+    margin: 0 0 1.5rem;
+}
+
+.path-local-hence .hence-stat {
+    padding: 0.75rem 0.85rem;
+    background: #f6f9fc;
+    border-radius: 8px;
+}
+
+.path-local-hence .hence-stat b {
+    display: block;
+    font-size: 1.35rem;
+    line-height: 1.2;
+    color: #061b31;
+}
+
+.path-local-hence .hence-stat span {
+    color: #3d4d5c;
+    font-size: 0.85rem;
+}
+
+.path-local-hence .hence-claim {
+    margin: 0 0 1rem;
+    padding: 0.9rem 1rem;
+    border: 1px solid #e4e8ee;
+    border-radius: 8px;
+    background: #fff;
+}
+
+.path-local-hence .hence-claim header {
+    display: flex;
+    justify-content: space-between;
+    gap: 1rem;
+    align-items: baseline;
+}
+
+.path-local-hence .hence-belief {
+    font-variant-numeric: tabular-nums;
+    font-weight: 650;
+    color: #533afd;
+}
+
+.path-local-hence .hence-finding-believe {
+    color: #0d6b3d;
+}
+
+.path-local-hence .hence-finding-withhold {
+    color: #8a4b08;
+}
+
+.path-local-hence .hence-meta {
+    margin: 0.25rem 0 0.6rem;
+    color: #3d4d5c;
+    font-size: 0.9rem;
+}
+
+.path-local-hence .hence-because {
+    margin: 0;
+    padding-inline-start: 1.1rem;
+}
+
+.path-local-hence .hence-json {
+    margin: 0 0 1rem;
+}
+
+.path-local-hence .hence-json pre {
+    max-height: 24rem;
+    overflow: auto;
+    padding: 0.75rem 0.9rem;
+    background: #061b31;
+    color: #f4f7fb;
+    border-radius: 8px;
+    direction: ltr;
+    text-align: left;
+}
+
+@media (max-width: 800px) {
+    .path-local-hence .hence-stats {
+        grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+}
