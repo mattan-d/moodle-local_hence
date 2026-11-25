@@ -48,7 +48,7 @@ class send_evidence extends \core\task\scheduled_task {
     public function execute(): void {
         $result = sender::send();
         if ($result['error'] === 'notconfigured') {
-            mtrace('Hence address or secret is not set. No facts were sent.');
+            mtrace('Hence secret is not set. No facts were sent.');
             return;
         }
         if ($result['error'] !== '') {

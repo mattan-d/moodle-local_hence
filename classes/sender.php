@@ -33,6 +33,9 @@ namespace local_hence;
  */
 class sender {
 
+    /** @var string Where facts go unless a manager sets another address. */
+    public const DEFAULT_ENDPOINT = 'https://hence.today/evidence.php';
+
     /** @var int Facts in one request. */
     private const BATCH = 200;
 
@@ -42,10 +45,10 @@ class sender {
      * @return array{count:int,pending:int,error:string}
      */
     public static function send(): array {
-        $endpoint = trim((string) get_config('local_hence', 'endpoint'));
+        $endpoint = self::endpoint();
         $secret = trim((string) get_config('local_hence', 'secret'));
         $pending = self::pending();
-        if ($endpoint === '' || $secret === '') {
+        if ($secret === '') {
             self::remember(0, 'notconfigured');
             return ['count' => 0, 'pending' => count($pending), 'error' => 'notconfigured'];
         }
@@ -66,6 +69,16 @@ class sender {
         }
         self::remember($sent, '');
         return ['count' => $sent, 'pending' => 0, 'error' => ''];
+    }
+
+    /**
+     * The saved address, or the Hence endpoint when none has been saved.
+     *
+     * @return string
+     */
+    public static function endpoint(): string {
+        $endpoint = trim((string) get_config('local_hence', 'endpoint'));
+        return $endpoint !== '' ? $endpoint : self::DEFAULT_ENDPOINT;
     }
 
     /**

@@ -43,7 +43,7 @@ if ($hassiteconfig) {
             'local_hence/endpoint',
             get_string('endpoint', 'local_hence'),
             get_string('endpoint_desc', 'local_hence'),
-            'https://hence.today/evidence.php',
+            \local_hence\sender::DEFAULT_ENDPOINT,
             PARAM_URL
         ));
         $settings->add(new admin_setting_configpasswordunmask(
