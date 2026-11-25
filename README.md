@@ -30,7 +30,9 @@ A fact is one of:
 - `AssignmentSubmitted` — the latest submitted attempt on an assignment
 - `GradeRecorded` — a final grade on an activity or a manual grade item
 
-The JSON body has `site`, `sent_at`, and `evidence`. Each evidence item has `id`, `person` (`user_` plus the Moodle user id), `source` (`Moodle`), `type`, `occurred_at`, and `metadata` (`course`, `signal`, and for a grade also `grade` and `max`).
+Hence does not receive the person's name, email, or Moodle user id. Each user gets one Hence id when the account is created, and that id never changes. It looks like `HNC-7K3M-9Q2P-4X8N-6B2D`. The person can open it from the user menu, **My Hence id**, and later use that same id to open their Hence account. A manager can see the id next to the person on the administration page. The link between the Moodle user and the Hence id stays in Moodle.
+
+The JSON body has `site`, `sent_at`, and `evidence`. Each evidence item has `id`, `person` (the Hence id), `source` (`Moodle`), `type`, `occurred_at`, and `metadata` (`course`, `signal`, and for a grade also `grade` and `max`).
 
 Hence answers `{"ok": true, "accepted": N}`. Only then does the plugin remember that fact. A refused batch stays pending and is tried on the next run.
 
@@ -53,7 +55,7 @@ The page requires the `local/hence:view` capability. Managers have it by default
 
 ## Privacy
 
-The plugin stores the id and time of each fact Hence has accepted, in `local_hence_sent`, so it is not sent again. It does not store a copy of the grade or a user id in that table. The facts themselves are sent to Hence: the Moodle user id, the course, and what happened.
+The plugin stores the permanent Hence id for each Moodle user in `local_hence_person`. It also stores the id and time of each fact Hence has accepted, in `local_hence_sent`, so it is not sent again. That second table does not store a user id. The facts sent to Hence carry the Hence id, the course, and what happened. They do not carry the person's name.
 
 ## Support
 

@@ -27,6 +27,7 @@ namespace local_hence\privacy;
 use core_privacy\local\metadata\collection;
 use core_privacy\local\request\approved_contextlist;
 use core_privacy\local\request\contextlist;
+use core_privacy\local\request\writer;
 
 /**
  * Records which fact ids were accepted by Hence. The fact id is not a user id.
@@ -45,6 +46,10 @@ class provider implements
      * @return collection
      */
     public static function get_metadata(collection $collection): collection {
+        $collection->add_database_table('local_hence_person', [
+            'userid' => 'privacy:metadata:person:userid',
+            'publicid' => 'privacy:metadata:person:publicid',
+        ], 'privacy:metadata:person');
         $collection->add_database_table('local_hence_sent', [
             'factid' => 'privacy:metadata:sent:factid',
             'occurred' => 'privacy:metadata:sent:occurred',
@@ -58,13 +63,19 @@ class provider implements
     }
 
     /**
-     * The local table does not store a user id.
+     * The Hence id is stored against the site, because it is not tied to one course.
      *
      * @param int $userid
      * @return contextlist
      */
     public static function get_contexts_for_userid(int $userid): contextlist {
-        return new contextlist();
+        global $DB;
+
+        $contextlist = new contextlist();
+        if ($DB->record_exists('local_hence_person', ['userid' => $userid])) {
+            $contextlist->add_system_context();
+        }
+        return $contextlist;
     }
 
     /**
@@ -72,6 +83,19 @@ class provider implements
      * @return void
      */
     public static function export_user_data(approved_contextlist $contextlist): void {
+        global $DB;
+
+        if (!$contextlist->get_contextids()) {
+            return;
+        }
+        $record = $DB->get_record('local_hence_person', ['userid' => $contextlist->get_user()->id]);
+        if (!$record) {
+            return;
+        }
+        writer::with_context(\context_system::instance())->export_data(
+            [get_string('pluginname', 'local_hence')],
+            (object) ['publicid' => $record->publicid]
+        );
     }
 
     /**
@@ -79,6 +103,11 @@ class provider implements
      * @return void
      */
     public static function delete_data_for_all_users_in_context(\context $context): void {
+        global $DB;
+
+        if ($context->contextlevel == CONTEXT_SYSTEM) {
+            $DB->delete_records('local_hence_person');
+        }
     }
 
     /**
@@ -86,5 +115,11 @@ class provider implements
      * @return void
      */
     public static function delete_data_for_user(approved_contextlist $contextlist): void {
+        global $DB;
+
+        if (!$contextlist->get_contextids()) {
+            return;
+        }
+        $DB->delete_records('local_hence_person', ['userid' => $contextlist->get_user()->id]);
     }
 }

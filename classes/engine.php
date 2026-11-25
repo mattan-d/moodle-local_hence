@@ -71,7 +71,7 @@ class engine {
      * @return array{evidence:array,claims:array,explain:array}
      */
     public static function payloads(int $userid, array $facts, array $claims): array {
-        $person = 'user_' . $userid;
+        $person = person::public_id($userid);
         $evidence = [];
         foreach ($facts as $fact) {
             $metadata = [

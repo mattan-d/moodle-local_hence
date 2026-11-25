@@ -6,6 +6,14 @@
     background: #f7f5ff;
 }
 
+.path-local-hence .hence-id {
+    margin: 0.35rem 0 1rem;
+    font-family: ui-monospace, "IBM Plex Mono", monospace;
+    font-size: 1.15rem;
+    letter-spacing: 0.04em;
+    color: #061b31;
+}
+
 .path-local-hence .hence-rule {
     margin: 0.35rem 0 0;
     color: #061b31;

@@ -44,5 +44,14 @@ function xmldb_local_hence_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026112601, 'local', 'hence');
     }
 
+    if ($oldversion < 2026112602) {
+        $table = new xmldb_table('local_hence_person');
+        if (!$dbman->table_exists($table)) {
+            $dbman->install_one_table_from_xmldb_file(__DIR__ . '/install.xml', 'local_hence_person');
+        }
+        \local_hence\person::ensure_missing();
+        upgrade_plugin_savepoint(true, 2026112602, 'local', 'hence');
+    }
+
     return true;
 }

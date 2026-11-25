@@ -28,7 +28,7 @@ $string['pluginname'] = 'Hence';
 $string['hence:view'] = 'צפייה ברשומת הבדיקה של Hence';
 $string['privacy:metadata'] = 'Hence קורא הגשות וציונים ש-Moodle כבר שומר. הוא לא שומר עותק משלו.';
 
-$string['testbanner'] = 'עובדות חדשות נשלחות ל-Hence כל 4 שעות. העמוד הזה עדיין כל הרשומה: כל עובדה, כל טענה, ומה שממתין לצאת.';
+$string['testbanner'] = 'עובדות חדשות נשלחות ל-Hence כל 4 שעות, תחת מזהה קבוע. Hence לא מקבל את שם האדם. העמוד הזה עדיין כל הרשומה.';
 $string['rule'] = 'מאמינים לטענה רק כשיש לפחות שתי עובדות, הן נפרסות על {$a} ימים, והאמונה היא לפחות 0.75. עובדה אחת נשארת אות. הממצא אז הוא «עדיין לא».';
 $string['summary'] = 'מה Moodle יכול לשלוח';
 $string['peoplecount'] = 'אנשים עם עובדות';
@@ -100,6 +100,14 @@ $string['privacy:metadata:sent'] = 'מזהה של עובדה ש-Hence כבר ק�
 $string['privacy:metadata:sent:factid'] = 'מזהה העובדה.';
 $string['privacy:metadata:sent:occurred'] = 'מתי העובדה קרתה ב-Moodle.';
 $string['privacy:metadata:hence'] = 'עובדות נשלחות ל-Hence.';
-$string['privacy:metadata:hence:person'] = 'מזהה המשתמש ב-Moodle שהעובדה עליו.';
+$string['privacy:metadata:hence:person'] = 'המזהה הקבוע של האדם ב-Hence. השם לא נשלח.';
+
+$string['myid'] = 'המזהה שלי ב-Hence';
+$string['myid_desc'] = 'המזהה הזה שלך לכל החיים. איתו אפשר להתחבר לחשבון ב-Hence בעתיד. השם שלך לא נשמר ב-Hence.';
+$string['personid'] = 'מזהה Hence';
+$string['personid_desc'] = 'Hence מקבל את המזהה הקבוע הזה, לא את שם האדם.';
+$string['privacy:metadata:person'] = 'המזהה הקבוע של המשתמש ב-Hence.';
+$string['privacy:metadata:person:userid'] = 'המשתמש ב-Moodle שהמזהה שייך לו. הקישור נשאר ב-Moodle.';
+$string['privacy:metadata:person:publicid'] = 'המזהה הקבוע ש-Hence שומר במקום שם.';
 $string['privacy:metadata:hence:course'] = 'הקורס שממנו הגיעה העובדה.';
 $string['privacy:metadata:hence:signal'] = 'מה קרה: הגשה או ציון.';

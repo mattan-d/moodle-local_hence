@@ -96,6 +96,7 @@ class sender {
     private static function post(string $endpoint, string $secret, array $facts): string {
         global $CFG;
 
+        $people = person::public_ids(array_column($facts, 'userid'));
         $evidence = [];
         foreach ($facts as $fact) {
             $metadata = [
@@ -108,7 +109,7 @@ class sender {
             }
             $evidence[] = [
                 'id' => $fact['id'],
-                'person' => 'user_' . $fact['userid'],
+                'person' => $people[(int) $fact['userid']],
                 'source' => 'Moodle',
                 'type' => $fact['type'],
                 'occurred_at' => gmdate('c', (int) $fact['occurred']),

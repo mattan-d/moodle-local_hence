@@ -28,7 +28,7 @@ $string['pluginname'] = 'Hence';
 $string['hence:view'] = 'View the Hence test record';
 $string['privacy:metadata'] = 'Hence reads assignment submissions and grades that Moodle already stores. It does not keep its own copy.';
 
-$string['testbanner'] = 'New facts are sent to Hence every 4 hours. This page is still the whole record: every fact, every claim, and what is waiting to go out.';
+$string['testbanner'] = 'New facts are sent to Hence every 4 hours, under a permanent id. Hence does not receive the person\'s name. This page is still the whole record.';
 $string['rule'] = 'A claim is believed only when there are at least two facts, they span {$a} days, and the belief is at least 0.75. One fact stays a signal. The finding is then “not yet”.';
 $string['summary'] = 'What Moodle can send';
 $string['peoplecount'] = 'People with facts';
@@ -100,6 +100,14 @@ $string['privacy:metadata:sent'] = 'The id of a fact Hence has already accepted,
 $string['privacy:metadata:sent:factid'] = 'The fact id.';
 $string['privacy:metadata:sent:occurred'] = 'When the fact happened in Moodle.';
 $string['privacy:metadata:hence'] = 'Facts are sent to Hence.';
-$string['privacy:metadata:hence:person'] = 'The Moodle user id the fact is about.';
+$string['privacy:metadata:hence:person'] = 'The person\'s permanent Hence id. Their name is not sent.';
+
+$string['myid'] = 'My Hence id';
+$string['myid_desc'] = 'This id is yours for life. You use it later to open your Hence account. Your name is not stored in Hence.';
+$string['personid'] = 'Hence id';
+$string['personid_desc'] = 'Hence receives this permanent id, not the person\'s name.';
+$string['privacy:metadata:person'] = 'The permanent Hence id for this user.';
+$string['privacy:metadata:person:userid'] = 'The Moodle user this id belongs to. This link stays in Moodle.';
+$string['privacy:metadata:person:publicid'] = 'The permanent id Hence stores instead of a name.';
 $string['privacy:metadata:hence:course'] = 'The course the fact came from.';
 $string['privacy:metadata:hence:signal'] = 'What happened: a submission or a grade.';

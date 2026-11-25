@@ -28,6 +28,7 @@ require_once($CFG->libdir . '/adminlib.php');
 
 use local_hence\collector;
 use local_hence\engine;
+use local_hence\person;
 use local_hence\sender;
 
 require_login();
@@ -68,6 +69,7 @@ if ($selected === null && $people) {
 $facts = $userid ? collector::facts_for($userid) : [];
 $claims = engine::claims($facts);
 $payloads = $userid ? engine::payloads($userid, $facts, $claims) : [];
+$henceids = $people ? person::public_ids(array_column($people, 'id')) : [];
 
 echo $OUTPUT->header();
 echo $OUTPUT->heading(get_string('pluginname', 'local_hence'));
@@ -132,6 +134,7 @@ if (!$people) {
     $table = new html_table();
     $table->head = [
         get_string('person', 'local_hence'),
+        get_string('personid', 'local_hence'),
         get_string('email', 'local_hence'),
         get_string('facts', 'local_hence'),
         '',
@@ -145,6 +148,7 @@ if (!$people) {
         }
         $table->data[] = [
             $name,
+            html_writer::tag('span', s($henceids[$person['id']] ?? ''), ['class' => 'hence-id']),
             s($person['email']),
             $person['facts'],
             html_writer::link($link, get_string('open', 'local_hence')),
@@ -155,6 +159,8 @@ if (!$people) {
 
 if ($selected) {
     echo $OUTPUT->heading(s($selected['fullname']), 3);
+    echo html_writer::tag('p', get_string('personid_desc', 'local_hence'), ['class' => 'hence-rule']);
+    echo html_writer::tag('p', s($henceids[$selected['id']] ?? ''), ['class' => 'hence-id']);
 
     echo $OUTPUT->heading(get_string('evidence', 'local_hence'), 4);
     $evidencetable = new html_table();
