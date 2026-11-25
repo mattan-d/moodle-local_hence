@@ -28,10 +28,12 @@ require_once($CFG->libdir . '/adminlib.php');
 
 use local_hence\collector;
 use local_hence\engine;
+use local_hence\sender;
 
 require_login();
 
 $userid = optional_param('userid', 0, PARAM_INT);
+$sendnow = optional_param('sendnow', 0, PARAM_BOOL);
 
 $url = new moodle_url('/local/hence/index.php');
 if ($userid) {
@@ -42,6 +44,12 @@ $PAGE->set_context(context_system::instance());
 admin_externalpage_setup('local_hence');
 $PAGE->set_url($url);
 $PAGE->requires->css(new moodle_url('/local/hence/styles.css'));
+
+if ($sendnow) {
+    require_sesskey();
+    sender::send();
+    redirect(new moodle_url('/local/hence/index.php'));
+}
 
 $summary = collector::summary();
 $people = collector::people();
@@ -67,6 +75,38 @@ echo $OUTPUT->heading(get_string('pluginname', 'local_hence'));
 echo html_writer::start_div('hence-banner');
 echo html_writer::tag('p', get_string('testbanner', 'local_hence'));
 echo html_writer::tag('p', get_string('rule', 'local_hence', engine::SPAN_DAYS), ['class' => 'hence-rule']);
+echo html_writer::end_div();
+
+$lasterror = (string) get_config('local_hence', 'lasterror');
+$lastsuccess = (int) get_config('local_hence', 'lastsuccess');
+$lastcount = (int) get_config('local_hence', 'lastcount');
+$pendingcount = count(sender::pending());
+$task = \core\task\manager::get_scheduled_task(\local_hence\task\send_evidence::class);
+$nextrun = ($task && $task->get_next_run_time()) ? userdate($task->get_next_run_time()) : '';
+
+echo $OUTPUT->heading(get_string('sendheading', 'local_hence'), 3);
+echo html_writer::start_div('hence-banner');
+echo html_writer::tag('p', get_string('schedule_desc', 'local_hence'));
+if ($lastsuccess) {
+    echo html_writer::tag('p', get_string('sendlast', 'local_hence', userdate($lastsuccess)));
+    echo html_writer::tag('p', get_string('sendcount', 'local_hence', $lastcount));
+} else {
+    echo html_writer::tag('p', get_string('sendnever', 'local_hence'));
+}
+echo html_writer::tag('p', get_string('sendpending', 'local_hence', $pendingcount));
+if ($nextrun !== '') {
+    echo html_writer::tag('p', get_string('sendnext', 'local_hence', $nextrun));
+}
+if ($lasterror !== '') {
+    $errorkey = in_array($lasterror, ['notconfigured', 'network', 'encode'], true) ? $lasterror : 'http';
+    echo html_writer::tag('p', get_string('senderror_' . $errorkey, 'local_hence', $lasterror), ['class' => 'hence-finding-withhold']);
+}
+echo $OUTPUT->single_button(
+    new moodle_url('/local/hence/index.php'),
+    get_string('sendnow', 'local_hence'),
+    'post',
+    ['params' => ['sendnow' => 1]]
+);
 echo html_writer::end_div();
 
 echo $OUTPUT->heading(get_string('summary', 'local_hence'), 3);

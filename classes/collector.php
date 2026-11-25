@@ -187,6 +187,67 @@ class collector {
     }
 
     /**
+     * Every fact on the site, with the Moodle user id.
+     *
+     * @return array<int,array<string,mixed>>
+     */
+    public static function all_facts(): array {
+        global $DB;
+
+        $facts = [];
+        $submissions = $DB->get_records_sql(
+            "SELECT s.id, s.userid, s.timemodified, a.name AS assignment, c.id AS courseid, c.fullname AS course
+               FROM {assign_submission} s
+               JOIN {assign} a ON a.id = s.assignment
+               JOIN {course} c ON c.id = a.course
+              WHERE s.status = 'submitted'
+                AND s.latest = 1"
+        );
+        foreach ($submissions as $row) {
+            $facts[] = [
+                'id' => 'submission-' . $row->id,
+                'userid' => (int) $row->userid,
+                'kind' => 'submission',
+                'type' => 'AssignmentSubmitted',
+                'source' => (string) $row->course,
+                'courseid' => (int) $row->courseid,
+                'signal' => (string) $row->assignment,
+                'occurred' => (int) $row->timemodified,
+            ];
+        }
+
+        $grades = $DB->get_records_sql(
+            "SELECT gg.id, gg.userid, gg.finalgrade, gg.timemodified,
+                    gi.itemname, gi.grademax, gi.itemmodule,
+                    c.id AS courseid, c.fullname AS course
+               FROM {grade_grades} gg
+               JOIN {grade_items} gi ON gi.id = gg.itemid
+               JOIN {course} c ON c.id = gi.courseid
+              WHERE gg.finalgrade IS NOT NULL
+                AND gi.itemtype IN ('mod', 'manual')"
+        );
+        foreach ($grades as $row) {
+            $item = trim((string) $row->itemname);
+            if ($item === '') {
+                $item = (string) $row->itemmodule;
+            }
+            $facts[] = [
+                'id' => 'grade-' . $row->id,
+                'userid' => (int) $row->userid,
+                'kind' => 'grade',
+                'type' => 'GradeRecorded',
+                'source' => (string) $row->course,
+                'courseid' => (int) $row->courseid,
+                'signal' => $item,
+                'grade' => (float) $row->finalgrade,
+                'max' => (float) $row->grademax,
+                'occurred' => (int) $row->timemodified,
+            ];
+        }
+        return $facts;
+    }
+
+    /**
      * SQL fragment: the user has a submission or a recorded grade.
      *
      * @param string $useridcolumn

@@ -24,23 +24,67 @@
 
 namespace local_hence\privacy;
 
-use core_privacy\local\metadata\null_provider;
+use core_privacy\local\metadata\collection;
+use core_privacy\local\request\approved_contextlist;
+use core_privacy\local\request\contextlist;
 
 /**
- * The plugin reads grades and submissions Moodle already stores. It keeps no copy.
+ * Records which fact ids were accepted by Hence. The fact id is not a user id.
+ * The facts themselves are sent to Hence.
  *
  * @package    local_hence
  * @copyright  2026 CentricApp
  * @license    http://www.gnu.org/copyleft/gpl.html GNU GPL v3 or later
  */
-class provider implements null_provider {
+class provider implements
+    \core_privacy\local\metadata\provider,
+    \core_privacy\local\request\plugin\provider {
 
     /**
-     * Explain why this plugin stores no data.
-     *
-     * @return string
+     * @param collection $collection
+     * @return collection
      */
-    public static function get_reason(): string {
-        return 'privacy:metadata';
+    public static function get_metadata(collection $collection): collection {
+        $collection->add_database_table('local_hence_sent', [
+            'factid' => 'privacy:metadata:sent:factid',
+            'occurred' => 'privacy:metadata:sent:occurred',
+        ], 'privacy:metadata:sent');
+        $collection->add_external_location_link('hence', [
+            'person' => 'privacy:metadata:hence:person',
+            'course' => 'privacy:metadata:hence:course',
+            'signal' => 'privacy:metadata:hence:signal',
+        ], 'privacy:metadata:hence');
+        return $collection;
+    }
+
+    /**
+     * The local table does not store a user id.
+     *
+     * @param int $userid
+     * @return contextlist
+     */
+    public static function get_contexts_for_userid(int $userid): contextlist {
+        return new contextlist();
+    }
+
+    /**
+     * @param approved_contextlist $contextlist
+     * @return void
+     */
+    public static function export_user_data(approved_contextlist $contextlist): void {
+    }
+
+    /**
+     * @param \context $context
+     * @return void
+     */
+    public static function delete_data_for_all_users_in_context(\context $context): void {
+    }
+
+    /**
+     * @param approved_contextlist $contextlist
+     * @return void
+     */
+    public static function delete_data_for_user(approved_contextlist $contextlist): void {
     }
 }

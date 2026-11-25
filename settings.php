@@ -31,4 +31,27 @@ if ($hassiteconfig) {
         new moodle_url('/local/hence/index.php'),
         'local/hence:view'
     ));
+
+    $settings = new admin_settingpage('local_hence_settings', get_string('settings', 'local_hence'));
+    if ($ADMIN->fulltree) {
+        $settings->add(new admin_setting_heading(
+            'local_hence/schedule',
+            get_string('scheduleheading', 'local_hence'),
+            get_string('schedule_desc', 'local_hence')
+        ));
+        $settings->add(new admin_setting_configtext(
+            'local_hence/endpoint',
+            get_string('endpoint', 'local_hence'),
+            get_string('endpoint_desc', 'local_hence'),
+            'https://hence.today/evidence.php',
+            PARAM_URL
+        ));
+        $settings->add(new admin_setting_configpasswordunmask(
+            'local_hence/secret',
+            get_string('secret', 'local_hence'),
+            get_string('secret_desc', 'local_hence'),
+            ''
+        ));
+    }
+    $ADMIN->add('localplugins', $settings);
 }

@@ -2,7 +2,7 @@
 
 Hence is the trust layer for human capability. This local plugin reads the facts Moodle already holds — assignment submissions and recorded grades — and shows them on a site administration page, together with the claims and explanations a test engine returns.
 
-Hence itself is still in test, so the plugin does not send those facts to an external service. The administration page is the whole record: every fact, every claim, and the JSON that would be exchanged.
+A scheduled task sends new facts to Hence once every 4 hours. That interval is the default and can be changed under Site administration > Server > Scheduled tasks. The administration page remains the full record, and it also shows what is waiting and when the last batch was accepted.
 
 ## Requirements
 
@@ -19,7 +19,7 @@ Hence itself is still in test, so the plugin does not send those facts to an ext
 
 The page lists people who have at least one submission or grade. Opening a person shows:
 
-- the evidence Moodle would send
+- the evidence Moodle sends
 - two claims: submitting coursework, and having graded work on record
 - the finding (believe, or not yet) and the facts underneath
 - the `POST /evidence`, `GET /claims` and `GET /explain` payloads
