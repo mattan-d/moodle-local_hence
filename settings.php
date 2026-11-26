@@ -25,13 +25,6 @@
 defined('MOODLE_INTERNAL') || die();
 
 if ($hassiteconfig) {
-    $ADMIN->add('localplugins', new admin_externalpage(
-        'local_hence',
-        get_string('pluginname', 'local_hence'),
-        new moodle_url('/local/hence/index.php'),
-        'local/hence:view'
-    ));
-
     $settings = new admin_settingpage('local_hence_settings', get_string('settings', 'local_hence'));
     if ($ADMIN->fulltree) {
         $settings->add(new admin_setting_heading(
