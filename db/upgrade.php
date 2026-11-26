@@ -69,5 +69,9 @@ function xmldb_local_hence_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026112604, 'local', 'hence');
     }
 
+    if ($oldversion < 2026112605) {
+        upgrade_plugin_savepoint(true, 2026112605, 'local', 'hence');
+    }
+
     return true;
 }
