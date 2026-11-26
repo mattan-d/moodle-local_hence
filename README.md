@@ -22,7 +22,7 @@ Until Hence has issued the secret, the task records that it is not configured an
 
 ## What is sent
 
-Each run posts one request of facts Hence has not accepted yet. A request holds at most 40 facts and 24 KB. Course and activity names are cut at 80 characters. Anything still waiting goes out on a later run. A fact is sent again when its time in Moodle changes.
+Each run posts facts Hence has not accepted yet, 100 at a time, so one request never carries the whole queue. Course and activity names are cut at 80 characters. A fact is sent again when its time in Moodle changes.
 
 A fact is one of:
 

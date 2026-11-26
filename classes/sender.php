@@ -37,10 +37,10 @@ class sender {
     public const DEFAULT_ENDPOINT = 'https://hence.today/api/evidence';
 
     /** @var int Facts in one request. */
-    public const MAX_FACTS = 40;
+    public const MAX_FACTS = 100;
 
-    /** @var int JSON bytes in one request. */
-    public const MAX_BYTES = 24576;
+    /** @var int Safety ceiling for one request. A normal bulk of 100 stays under it. */
+    public const MAX_BYTES = 262144;
 
     /** @var int Characters kept from a course or activity name. */
     private const TEXT_LIMIT = 80;
@@ -63,49 +63,18 @@ class sender {
             return ['count' => 0, 'pending' => 0, 'error' => ''];
         }
 
-        $chunk = self::batch_for($pending);
-        if (!$chunk) {
-            self::remember(0, 'encode');
-            return ['count' => 0, 'pending' => count($pending), 'error' => 'encode'];
+        $sent = 0;
+        foreach (array_chunk($pending, self::MAX_FACTS) as $chunk) {
+            $error = self::post($endpoint, $secret, $chunk);
+            if ($error !== '') {
+                self::remember($sent, $error);
+                return ['count' => $sent, 'pending' => count($pending) - $sent, 'error' => $error];
+            }
+            self::mark_sent($chunk);
+            $sent += count($chunk);
         }
-        $error = self::post($endpoint, $secret, $chunk);
-        if ($error !== '') {
-            self::remember(0, $error);
-            return ['count' => 0, 'pending' => count($pending), 'error' => $error];
-        }
-        self::mark_sent($chunk);
-        $sent = count($chunk);
         self::remember($sent, '');
-        return ['count' => $sent, 'pending' => count($pending) - $sent, 'error' => ''];
-    }
-
-    /**
-     * The next request: at most MAX_FACTS facts, and at most MAX_BYTES of JSON.
-     *
-     * @param array<int,array<string,mixed>> $pending
-     * @return array<int,array<string,mixed>>
-     */
-    public static function batch_for(array $pending): array {
-        $chosen = [];
-        foreach ($pending as $fact) {
-            if (count($chosen) >= self::MAX_FACTS) {
-                break;
-            }
-            $trial = $chosen;
-            $trial[] = $fact;
-            $encoded = self::encode($trial, 'HNC-2345-6789-ABCD-EFGH');
-            if ($encoded === null) {
-                break;
-            }
-            if (strlen($encoded) > self::MAX_BYTES && $chosen) {
-                break;
-            }
-            $chosen = $trial;
-            if (strlen($encoded) > self::MAX_BYTES) {
-                break;
-            }
-        }
-        return $chosen;
+        return ['count' => $sent, 'pending' => 0, 'error' => ''];
     }
 
     /**
