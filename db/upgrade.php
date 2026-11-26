@@ -78,5 +78,12 @@ function xmldb_local_hence_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026112606, 'local', 'hence');
     }
 
+    if ($oldversion < 2026112607) {
+        if (get_config('local_hence', 'showinmenu') === false) {
+            set_config('showinmenu', 0, 'local_hence');
+        }
+        upgrade_plugin_savepoint(true, 2026112607, 'local', 'hence');
+    }
+
     return true;
 }

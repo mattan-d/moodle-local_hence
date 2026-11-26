@@ -41,6 +41,9 @@ class hook_callbacks {
         if (!isloggedin() || isguestuser()) {
             return;
         }
+        if (!(int) get_config('local_hence', 'showinmenu')) {
+            return;
+        }
         $item = new \stdClass();
         $item->itemtype = 'link';
         $item->url = new \moodle_url('/local/hence/my.php');

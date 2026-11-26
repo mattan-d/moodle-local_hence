@@ -59,6 +59,12 @@ if ($hassiteconfig) {
         } else {
             $registration = get_string('domain_waiting', 'local_hence', $domain);
         }
+        $settings->add(new admin_setting_configcheckbox(
+            'local_hence/showinmenu',
+            get_string('showinmenu', 'local_hence'),
+            get_string('showinmenu_desc', 'local_hence'),
+            0
+        ));
         $settings->add(new admin_setting_heading(
             'local_hence/registration',
             get_string('domain', 'local_hence'),
