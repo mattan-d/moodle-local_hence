@@ -31,5 +31,6 @@ defined('MOODLE_INTERNAL') || die();
  */
 function xmldb_local_hence_install() {
     set_config('endpoint', \local_hence\sender::DEFAULT_ENDPOINT, 'local_hence');
+    \local_hence\registrar::ensure();
     return true;
 }

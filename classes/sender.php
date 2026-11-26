@@ -46,7 +46,7 @@ class sender {
      */
     public static function send(): array {
         $endpoint = self::endpoint();
-        $secret = trim((string) get_config('local_hence', 'secret'));
+        $secret = registrar::ensure();
         $pending = self::pending();
         if ($secret === '') {
             self::remember(0, 'notconfigured');
@@ -130,6 +130,7 @@ class sender {
             ];
         }
         $payload = json_encode([
+            'domain' => registrar::domain(),
             'site' => $CFG->wwwroot,
             'sent_at' => gmdate('c'),
             'evidence' => $evidence,

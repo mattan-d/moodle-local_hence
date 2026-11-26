@@ -46,11 +46,23 @@ if ($hassiteconfig) {
             \local_hence\sender::DEFAULT_ENDPOINT,
             PARAM_URL
         ));
-        $settings->add(new admin_setting_configpasswordunmask(
-            'local_hence/secret',
-            get_string('secret', 'local_hence'),
-            get_string('secret_desc', 'local_hence'),
-            ''
+        $domain = \local_hence\registrar::domain();
+        \local_hence\registrar::ensure();
+        $registered = trim((string) get_config('local_hence', 'domain'));
+        $registererror = trim((string) get_config('local_hence', 'register_error'));
+        if ($registered === $domain && $domain !== '') {
+            $registration = get_string('domain_saved', 'local_hence', $domain);
+        } else if ($registererror === 'exists') {
+            $registration = get_string('domain_taken', 'local_hence', $domain);
+        } else if ($registererror !== '') {
+            $registration = get_string('domain_waiting', 'local_hence', $domain);
+        } else {
+            $registration = get_string('domain_waiting', 'local_hence', $domain);
+        }
+        $settings->add(new admin_setting_heading(
+            'local_hence/registration',
+            get_string('domain', 'local_hence'),
+            $registration
         ));
     }
     $ADMIN->add('localplugins', $settings);

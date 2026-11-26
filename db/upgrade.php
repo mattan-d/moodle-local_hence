@@ -73,5 +73,10 @@ function xmldb_local_hence_upgrade($oldversion) {
         upgrade_plugin_savepoint(true, 2026112605, 'local', 'hence');
     }
 
+    if ($oldversion < 2026112606) {
+        \local_hence\registrar::ensure();
+        upgrade_plugin_savepoint(true, 2026112606, 'local', 'hence');
+    }
+
     return true;
 }

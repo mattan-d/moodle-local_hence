@@ -29,6 +29,7 @@ require_once($CFG->libdir . '/adminlib.php');
 use local_hence\collector;
 use local_hence\engine;
 use local_hence\person;
+use local_hence\registrar;
 use local_hence\sender;
 
 require_login();
@@ -88,6 +89,17 @@ $nextrun = ($task && $task->get_next_run_time()) ? userdate($task->get_next_run_
 
 echo $OUTPUT->heading(get_string('sendheading', 'local_hence'), 3);
 echo html_writer::start_div('hence-banner');
+$domain = registrar::domain();
+registrar::ensure();
+$saveddomain = trim((string) get_config('local_hence', 'domain'));
+$registererror = trim((string) get_config('local_hence', 'register_error'));
+if ($saveddomain === $domain && $domain !== '') {
+    echo html_writer::tag('p', get_string('domain_saved', 'local_hence', $domain));
+} else if ($registererror === 'exists') {
+    echo html_writer::tag('p', get_string('domain_taken', 'local_hence', $domain), ['class' => 'hence-finding-withhold']);
+} else {
+    echo html_writer::tag('p', get_string('domain_waiting', 'local_hence', $domain));
+}
 echo html_writer::tag('p', get_string('schedule_desc', 'local_hence'));
 if ($lastsuccess) {
     echo html_writer::tag('p', get_string('sendlast', 'local_hence', userdate($lastsuccess)));
