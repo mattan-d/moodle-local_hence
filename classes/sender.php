@@ -37,7 +37,13 @@ class sender {
     public const DEFAULT_ENDPOINT = 'https://hence.today/api/evidence';
 
     /** @var int Facts in one request. */
-    private const BATCH = 200;
+    public const MAX_FACTS = 40;
+
+    /** @var int JSON bytes in one request. */
+    public const MAX_BYTES = 24576;
+
+    /** @var int Characters kept from a course or activity name. */
+    private const TEXT_LIMIT = 80;
 
     /**
      * Send pending facts.
@@ -57,18 +63,49 @@ class sender {
             return ['count' => 0, 'pending' => 0, 'error' => ''];
         }
 
-        $sent = 0;
-        foreach (array_chunk($pending, self::BATCH) as $chunk) {
-            $error = self::post($endpoint, $secret, $chunk);
-            if ($error !== '') {
-                self::remember($sent, $error);
-                return ['count' => $sent, 'pending' => count($pending) - $sent, 'error' => $error];
-            }
-            self::mark_sent($chunk);
-            $sent += count($chunk);
+        $chunk = self::batch_for($pending);
+        if (!$chunk) {
+            self::remember(0, 'encode');
+            return ['count' => 0, 'pending' => count($pending), 'error' => 'encode'];
         }
+        $error = self::post($endpoint, $secret, $chunk);
+        if ($error !== '') {
+            self::remember(0, $error);
+            return ['count' => 0, 'pending' => count($pending), 'error' => $error];
+        }
+        self::mark_sent($chunk);
+        $sent = count($chunk);
         self::remember($sent, '');
-        return ['count' => $sent, 'pending' => 0, 'error' => ''];
+        return ['count' => $sent, 'pending' => count($pending) - $sent, 'error' => ''];
+    }
+
+    /**
+     * The next request: at most MAX_FACTS facts, and at most MAX_BYTES of JSON.
+     *
+     * @param array<int,array<string,mixed>> $pending
+     * @return array<int,array<string,mixed>>
+     */
+    public static function batch_for(array $pending): array {
+        $chosen = [];
+        foreach ($pending as $fact) {
+            if (count($chosen) >= self::MAX_FACTS) {
+                break;
+            }
+            $trial = $chosen;
+            $trial[] = $fact;
+            $encoded = self::encode($trial, 'HNC-2345-6789-ABCD-EFGH');
+            if ($encoded === null) {
+                break;
+            }
+            if (strlen($encoded) > self::MAX_BYTES && $chosen) {
+                break;
+            }
+            $chosen = $trial;
+            if (strlen($encoded) > self::MAX_BYTES) {
+                break;
+            }
+        }
+        return $chosen;
     }
 
     /**
@@ -110,32 +147,8 @@ class sender {
         global $CFG;
 
         $people = person::public_ids(array_column($facts, 'userid'));
-        $evidence = [];
-        foreach ($facts as $fact) {
-            $metadata = [
-                'course' => $fact['source'],
-                'signal' => $fact['signal'],
-            ];
-            if ($fact['kind'] === 'grade') {
-                $metadata['grade'] = $fact['grade'];
-                $metadata['max'] = $fact['max'];
-            }
-            $evidence[] = [
-                'id' => $fact['id'],
-                'person' => $people[(int) $fact['userid']],
-                'source' => 'Moodle',
-                'type' => $fact['type'],
-                'occurred_at' => gmdate('c', (int) $fact['occurred']),
-                'metadata' => $metadata,
-            ];
-        }
-        $payload = json_encode([
-            'domain' => registrar::domain(),
-            'site' => $CFG->wwwroot,
-            'sent_at' => gmdate('c'),
-            'evidence' => $evidence,
-        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
-        if ($payload === false) {
+        $payload = self::encode($facts, '', $people);
+        if ($payload === null || strlen($payload) > self::MAX_BYTES) {
             return 'encode';
         }
 
@@ -160,6 +173,56 @@ class sender {
             return 'network';
         }
         return 'http-' . $status;
+    }
+
+    /**
+     * @param array<int,array<string,mixed>> $facts
+     * @param string $standin Used only to measure size before the real ids are loaded.
+     * @param array<int,string> $people
+     * @return string|null
+     */
+    private static function encode(array $facts, string $standin = '', array $people = []): ?string {
+        global $CFG;
+
+        $evidence = [];
+        foreach ($facts as $fact) {
+            $person = $people[(int) ($fact['userid'] ?? 0)] ?? $standin;
+            $metadata = [
+                'course' => self::clip((string) ($fact['source'] ?? '')),
+                'signal' => self::clip((string) ($fact['signal'] ?? '')),
+            ];
+            if (($fact['kind'] ?? '') === 'grade') {
+                $metadata['grade'] = $fact['grade'];
+                $metadata['max'] = $fact['max'];
+            }
+            $evidence[] = [
+                'id' => $fact['id'],
+                'person' => $person,
+                'source' => 'Moodle',
+                'type' => $fact['type'],
+                'occurred_at' => gmdate('c', (int) $fact['occurred']),
+                'metadata' => $metadata,
+            ];
+        }
+        $payload = json_encode([
+            'domain' => registrar::domain(),
+            'site' => $CFG->wwwroot ?? '',
+            'sent_at' => gmdate('c'),
+            'evidence' => $evidence,
+        ], JSON_UNESCAPED_UNICODE | JSON_UNESCAPED_SLASHES);
+        return is_string($payload) ? $payload : null;
+    }
+
+    /**
+     * @param string $value
+     * @return string
+     */
+    private static function clip(string $value): string {
+        $value = trim(preg_replace('/\s+/u', ' ', $value) ?? $value);
+        if (function_exists('mb_substr')) {
+            return mb_substr($value, 0, self::TEXT_LIMIT);
+        }
+        return substr($value, 0, self::TEXT_LIMIT);
     }
 
     /**
