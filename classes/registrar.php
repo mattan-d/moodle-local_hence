@@ -104,8 +104,9 @@ class registrar {
             'Accept: application/json',
         ]);
         $curl->setopt([
-            'CURLOPT_TIMEOUT' => 15,
-            'CURLOPT_CONNECTTIMEOUT' => 5,
+            'CURLOPT_TIMEOUT' => 20,
+            'CURLOPT_CONNECTTIMEOUT' => 8,
+            'CURLOPT_IPRESOLVE' => CURL_IPRESOLVE_V4,
         ]);
         try {
             $response = $curl->post($endpoint, $payload);

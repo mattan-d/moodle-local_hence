@@ -48,7 +48,9 @@ class send_evidence extends \core\task\scheduled_task {
     public function execute(): void {
         $result = sender::send();
         if ($result['error'] === 'notconfigured') {
-            mtrace('Hence secret is not set. No facts were sent.');
+            $domain = \local_hence\registrar::domain();
+            $why = trim((string) get_config('local_hence', 'register_error'));
+            mtrace('No sending secret for ' . $domain . ($why !== '' ? ' (' . $why . ').' : '.'));
             return;
         }
         if ($result['error'] !== '') {

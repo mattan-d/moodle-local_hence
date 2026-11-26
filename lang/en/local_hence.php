@@ -85,6 +85,7 @@ $string['secret_desc'] = 'Created automatically for this site\'s domain. It is s
 $string['showinmenu'] = 'Show My Hence id in the user menu';
 $string['showinmenu_desc'] = 'Off by default. Turn it on to add a link to each person\'s Hence id in the user menu.';
 $string['domain'] = 'Domain';
+$string['domainid_desc'] = '{$a} is this institution\'s id on Hence. The sending secret is created for it automatically.';
 $string['domain_saved'] = 'This site is registered as {$a}. The sending secret was saved automatically.';
 $string['domain_waiting'] = 'Hence has not issued a sending secret for {$a} yet. The next send will try again.';
 $string['domain_taken'] = 'Hence already has a sending secret for {$a}, and this site does not have that copy.';

@@ -27,6 +27,13 @@ defined('MOODLE_INTERNAL') || die();
 if ($hassiteconfig) {
     $settings = new admin_settingpage('local_hence_settings', get_string('settings', 'local_hence'));
     if ($ADMIN->fulltree) {
+        $domain = \local_hence\registrar::domain();
+        \local_hence\registrar::ensure();
+        $settings->add(new admin_setting_heading(
+            'local_hence/domainid',
+            $domain !== '' ? $domain : get_string('domain', 'local_hence'),
+            get_string('domainid_desc', 'local_hence', $domain)
+        ));
         $settings->add(new admin_setting_heading(
             'local_hence/schedule',
             get_string('scheduleheading', 'local_hence'),
@@ -39,8 +46,6 @@ if ($hassiteconfig) {
             \local_hence\sender::DEFAULT_ENDPOINT,
             PARAM_URL
         ));
-        $domain = \local_hence\registrar::domain();
-        \local_hence\registrar::ensure();
         $registered = trim((string) get_config('local_hence', 'domain'));
         $registererror = trim((string) get_config('local_hence', 'register_error'));
         if ($registered === $domain && $domain !== '') {
