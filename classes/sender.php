@@ -39,6 +39,9 @@ class sender {
     /** @var int Facts in one request. */
     public const MAX_FACTS = 100;
 
+    /** @var int Facts one cron run may send. The rest waits for the next run. */
+    public const MAX_PER_RUN = 1500;
+
     /** @var int Safety ceiling for one request. A normal bulk of 100 stays under it. */
     public const MAX_BYTES = 262144;
 
@@ -48,7 +51,7 @@ class sender {
     /**
      * Send pending facts.
      *
-     * @return array{count:int,pending:int,error:string}
+     * @return array{count:int,pending:int,error:string,capped?:bool}
      */
     public static function send(): array {
         $endpoint = self::endpoint();
@@ -63,18 +66,33 @@ class sender {
             return ['count' => 0, 'pending' => 0, 'error' => ''];
         }
 
+        $capped = count($pending) > self::MAX_PER_RUN;
+        if ($capped) {
+            $pending = array_slice($pending, 0, self::MAX_PER_RUN);
+        }
+        $queued = count($pending);
         $sent = 0;
         foreach (array_chunk($pending, self::MAX_FACTS) as $chunk) {
             $error = self::post($endpoint, $secret, $chunk);
             if ($error !== '') {
                 self::remember($sent, $error);
-                return ['count' => $sent, 'pending' => count($pending) - $sent, 'error' => $error];
+                return [
+                    'count' => $sent,
+                    'pending' => $queued - $sent,
+                    'error' => $error,
+                    'capped' => $capped,
+                ];
             }
             self::mark_sent($chunk);
             $sent += count($chunk);
         }
         self::remember($sent, '');
-        return ['count' => $sent, 'pending' => 0, 'error' => ''];
+        return [
+            'count' => $sent,
+            'pending' => $queued - $sent,
+            'error' => '',
+            'capped' => $capped,
+        ];
     }
 
     /**
@@ -97,10 +115,14 @@ class sender {
 
         $known = $DB->get_records_menu('local_hence_sent', null, '', 'factid, occurred');
         $pending = [];
-        foreach (collector::all_facts() as $fact) {
+        $limit = self::MAX_PER_RUN + 1;
+        foreach (collector::each_fact() as $fact) {
             $id = (string) $fact['id'];
             if (!array_key_exists($id, $known) || (int) $known[$id] !== (int) $fact['occurred']) {
                 $pending[] = $fact;
+                if (count($pending) >= $limit) {
+                    break;
+                }
             }
         }
         return $pending;

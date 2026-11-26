@@ -192,10 +192,18 @@ class collector {
      * @return array<int,array<string,mixed>>
      */
     public static function all_facts(): array {
+        return iterator_to_array(self::each_fact(), false);
+    }
+
+    /**
+     * Facts one at a time, so a send can stop without loading the whole site.
+     *
+     * @return \Generator<int,array<string,mixed>>
+     */
+    public static function each_fact(): \Generator {
         global $DB;
 
-        $facts = [];
-        $submissions = $DB->get_records_sql(
+        $submissions = $DB->get_recordset_sql(
             "SELECT s.id, s.userid, s.timemodified, a.name AS assignment, c.id AS courseid, c.fullname AS course
                FROM {assign_submission} s
                JOIN {assign} a ON a.id = s.assignment
@@ -203,20 +211,24 @@ class collector {
               WHERE s.status = 'submitted'
                 AND s.latest = 1"
         );
-        foreach ($submissions as $row) {
-            $facts[] = [
-                'id' => 'submission-' . $row->id,
-                'userid' => (int) $row->userid,
-                'kind' => 'submission',
-                'type' => 'AssignmentSubmitted',
-                'source' => (string) $row->course,
-                'courseid' => (int) $row->courseid,
-                'signal' => (string) $row->assignment,
-                'occurred' => (int) $row->timemodified,
-            ];
+        try {
+            foreach ($submissions as $row) {
+                yield [
+                    'id' => 'submission-' . $row->id,
+                    'userid' => (int) $row->userid,
+                    'kind' => 'submission',
+                    'type' => 'AssignmentSubmitted',
+                    'source' => (string) $row->course,
+                    'courseid' => (int) $row->courseid,
+                    'signal' => (string) $row->assignment,
+                    'occurred' => (int) $row->timemodified,
+                ];
+            }
+        } finally {
+            $submissions->close();
         }
 
-        $grades = $DB->get_records_sql(
+        $grades = $DB->get_recordset_sql(
             "SELECT gg.id, gg.userid, gg.finalgrade, gg.timemodified,
                     gi.itemname, gi.grademax, gi.itemmodule,
                     c.id AS courseid, c.fullname AS course
@@ -226,25 +238,28 @@ class collector {
               WHERE gg.finalgrade IS NOT NULL
                 AND gi.itemtype IN ('mod', 'manual')"
         );
-        foreach ($grades as $row) {
-            $item = trim((string) $row->itemname);
-            if ($item === '') {
-                $item = (string) $row->itemmodule;
+        try {
+            foreach ($grades as $row) {
+                $item = trim((string) $row->itemname);
+                if ($item === '') {
+                    $item = (string) $row->itemmodule;
+                }
+                yield [
+                    'id' => 'grade-' . $row->id,
+                    'userid' => (int) $row->userid,
+                    'kind' => 'grade',
+                    'type' => 'GradeRecorded',
+                    'source' => (string) $row->course,
+                    'courseid' => (int) $row->courseid,
+                    'signal' => $item,
+                    'grade' => (float) $row->finalgrade,
+                    'max' => (float) $row->grademax,
+                    'occurred' => (int) $row->timemodified,
+                ];
             }
-            $facts[] = [
-                'id' => 'grade-' . $row->id,
-                'userid' => (int) $row->userid,
-                'kind' => 'grade',
-                'type' => 'GradeRecorded',
-                'source' => (string) $row->course,
-                'courseid' => (int) $row->courseid,
-                'signal' => $item,
-                'grade' => (float) $row->finalgrade,
-                'max' => (float) $row->grademax,
-                'occurred' => (int) $row->timemodified,
-            ];
+        } finally {
+            $grades->close();
         }
-        return $facts;
     }
 
     /**

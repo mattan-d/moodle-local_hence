@@ -52,7 +52,13 @@ class send_evidence extends \core\task\scheduled_task {
             return;
         }
         if ($result['error'] !== '') {
-            mtrace('Hence did not accept the batch (' . $result['error'] . '). Nothing was marked as sent.');
+            mtrace('Hence did not accept the batch (' . $result['error'] . '). '
+                . $result['count'] . ' facts were sent before it stopped.');
+            return;
+        }
+        if (!empty($result['capped'])) {
+            mtrace('Sent ' . $result['count'] . ' facts to Hence. This run stops at '
+                . sender::MAX_PER_RUN . '; the rest waits for the next run.');
             return;
         }
         mtrace('Sent ' . $result['count'] . ' facts to Hence. ' . $result['pending'] . ' still waiting.');
